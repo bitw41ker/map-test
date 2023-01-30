@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { MapContainer, WMSTileLayer, ScaleControl } from 'react-leaflet';
+import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 import 'proj4';
 import 'proj4leaflet';
 import './Map.css';
@@ -13,14 +13,17 @@ let DefaultIcon = L.icon({
 });
 
 L.Marker.prototype.options.icon = DefaultIcon;
+const apikey = process.env.REACT_APP_MMLAPI;
 
 function EPSG2393() {
-  const crsName = 'EPSG:2393';
+  const crsName = 'EPSG:3067';
   const projDef =
-    '+proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl +towgs84=-96.062,-82.428,-121.753,-4.801,-0.345,1.376,1.496 +units=m +no_defs +type=crs';
+    '+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs';
 
   const opts = {
-    resolutions: [2207, 1103.5, 551.75, 275.875],
+    origin: [-548576, 8388608],
+    bounds: L.bounds([-548576, 8388608], [1548576, 6291456]),
+    resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64],
   };
   return new L.Proj.CRS(crsName, projDef, opts);
 }
@@ -31,15 +34,14 @@ export default function Map() {
     <MapContainer
       center={[65, 30]}
       zoom={0}
-      maxZoom={3}
+      maxZoom={7}
       crs={crs}
       scrollWheelZoom={true}
       continuousWorld={true}
       worldCopyJump={false}
     >
-      <WMSTileLayer
-        url="https://maps.omniscale.net/v2/demo/style.grayscale/map?epsg=2393"
-        // params={wmsOptions}
+      <TileLayer
+        url={`https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/ETRS-TM35FIN/{z}/{y}/{x}.png?api-key=${apikey}`}
       />
       <ScaleControl />
     </MapContainer>
